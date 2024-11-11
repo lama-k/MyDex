@@ -1,5 +1,11 @@
 pragma solidity ^0.8.0;
 
+// import the IERC2O interface
+import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+//import safeMath
+import "../node_modules/@openzeppelin/contracts/utils/math/Math.sol";
+
 contract Wallet {
     // define token struct with token name and address
     struct Token {
@@ -26,8 +32,6 @@ contract Wallet {
     );
 
     function addToken(address _tokenadress, bytes32 _ticker) external {
-        //check if token exist
-        require(tokenMapping[_ticker].ticker == 0, "Token already exists");
         require(
             tokenMapping[_ticker].tokenAddress != _tokenadress,
             "Token already exists"
@@ -39,7 +43,39 @@ contract Wallet {
 
     function deposit(bytes32 _ticker, uint256 _amount) external {}
 
+    /**
+     * withdraw _amount from this wallet to msg.sender balances into ERC20 Token contract
+     * requirements
+     * balance of msg.sender must be greater than or equal to _amount
+     * make call of transfer function in ERC20 token contract to transfer from this wallet address to msg.sender address
+     */
+
     function withdraw(bytes32 _ticker, uint256 _amount) external {
+        //check if token exist
+        require(
+            tokenMapping[_ticker].tokenAddress != address(0),
+            "Token does not exist"
+        );
         //check if the user have enough balance to witdraw
+        require(
+            balances[msg.sender][_ticker] >= _amount,
+            "Balance not sufficient"
+        );
+
+        uint256 _actualBalance = balances[msg.sender][_ticker];
+        // using Math library to avoid overflow
+        (bool sucess, uint256 newBalance) = Math.trySub(
+            _actualBalance,
+            _amount
+        );
+
+        // if no overflow adjust balances
+        if (sucess) {
+            balances[msg.sender][_ticker] = newBalance;
+            IERC20(tokenMapping[_ticker].tokenAddress).transfer(
+                msg.sender,
+                _amount
+            );
+        }
     }
 }
