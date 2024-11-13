@@ -63,6 +63,13 @@ contract Wallet is Ownable(msg.sender) {
         tokenList.push(_ticker);
     }
 
+    /**
+     *
+     * deposit  _amount of Token named by _ticker into the DEX
+     * make call of the tranferfrom function of Token contract
+     * requirements
+     * Dex needs to receive approval from User in Token Contract
+     */
     function deposit(
         bytes32 _ticker,
         uint256 _amount
