@@ -51,8 +51,8 @@ contract Wallet is Ownable(msg.sender) {
     }
 
     function addToken(
-        address _tokenadress,
-        bytes32 _ticker
+        bytes32 _ticker,
+        address _tokenadress
     ) external onlyOwner {
         require(
             tokenMapping[_ticker].tokenAddress != _tokenadress,
