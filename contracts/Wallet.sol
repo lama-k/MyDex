@@ -3,11 +3,13 @@ pragma solidity ^0.8.0;
 // import the IERC2O interface
 import "../node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol";
 //import safeMath
-import "../node_modules/@openzeppelin/contracts/utils/math/Math.sol";
+import "../node_modules/@openzeppelin/contracts/utils/math/SafeMath.sol";
 //import Owernable.sol
 import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
-contract Wallet is Ownable(msg.sender) {
+contract Wallet is Ownable {
+    using SafeMath for uint;
+    using SafeMath for uint256;
     // define token struct with token name and address
     struct Token {
         bytes32 ticker;
@@ -77,7 +79,7 @@ contract Wallet is Ownable(msg.sender) {
         IERC20 MTK = IERC20(tokenMapping[_ticker].tokenAddress);
         require(MTK.balanceOf(msg.sender) >= _amount, "no enough token");
         uint256 _currentbalance = balances[msg.sender][_ticker];
-        (bool success, uint newBalance) = Math.tryAdd(_currentbalance, _amount);
+        (bool success, uint newBalance) = SafeMath.tryAdd(_currentbalance, _amount);
         if (success) {
             balances[msg.sender][_ticker] = newBalance;
             MTK.transferFrom(msg.sender, address(this), _amount);
@@ -97,7 +99,7 @@ contract Wallet is Ownable(msg.sender) {
     ) external tokenExist(_ticker) hasEnoughBalance(_amount, _ticker) {
         uint256 _actualBalance = balances[msg.sender][_ticker];
         // using Math library to avoid overflow
-        (bool sucess, uint256 newBalance) = Math.trySub(
+        (bool sucess, uint256 newBalance) = SafeMath.trySub(
             _actualBalance,
             _amount
         );
